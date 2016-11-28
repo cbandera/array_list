@@ -8,7 +8,7 @@ class EmptyFixture : public ::testing::Test {
 public:
     EmptyFixture(){};
     static constexpr size_t capacity = 5;
-    Per::DLList<int, capacity> l;
+    cpb::DLList<int, capacity> l;
 };
 constexpr size_t EmptyFixture::capacity;
 
@@ -20,7 +20,7 @@ public:
         }
     };
     static constexpr size_t capacity = 5;
-    Per::DLList<int, capacity> l;
+    cpb::DLList<int, capacity> l;
 };
 constexpr size_t FullFixture::capacity;
 
@@ -60,7 +60,7 @@ TEST_F(EmptyFixture, MediumSize) {
 
 TEST_F(FullFixture, MaxSize) {
     ASSERT_EQ(capacity, l.max_size());
-    Per::DLList<int, 15> l2;
+    cpb::DLList<int, 15> l2;
     ASSERT_EQ(15, l2.max_size());
 }
 
@@ -102,25 +102,41 @@ TEST_F(FullFixture, EraseMiddle) {
     l.erase(++l.begin());
     ASSERT_EQ(capacity-1, l.size());
     ASSERT_EQ(0, l.front());
-    ASSERT_EQ(2, ++l.front());
+    ASSERT_EQ(2, *(++l.begin()));
+}
+
+TEST_F(FullFixture, EraseEnd) {
+    ASSERT_THROW(l.erase(l.end()),std::out_of_range);
 }
 
 TEST_F(FullFixture, Clear) {
-    ASSERT_EQ(true, false);
+    l.clear();
+    ASSERT_EQ(0, l.size());
+    ASSERT_EQ(true, l.empty());
 }
 
 /* ------------------------------------------------------------- */
 TEST_F(FullFixture, PopFront) {
-    ASSERT_EQ(true, false);
+	for(size_t i=0; i<capacity; i++){
+	    ASSERT_EQ(i, l.front());
+	    l.pop_front();
+	    ASSERT_EQ(capacity-i-1,l.size());
+	}
+	ASSERT_EQ(0,l.size());
 }
 
 TEST_F(FullFixture, PopBack) {
-    ASSERT_EQ(true, false);
+	for(int i=capacity-1; i>=0; i--){
+	    ASSERT_EQ(i, l.back());
+	    l.pop_back();
+	    ASSERT_EQ(i,l.size());
+	}
+	ASSERT_EQ(0,l.size());
 }
 
 
 /*TEST_F(PushTests, InsertFront) {
-    Per::DLList<int,5> l;
+    cpb::DLList<int,5> l;
 
     // Push front
     l.push_front(15);

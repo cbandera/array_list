@@ -3,7 +3,7 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace Per {
+namespace cpb {
 
 template <typename _Tp, size_t _N>
 class DLList {
@@ -114,7 +114,8 @@ private:
             return index.none();
         }
         void clear() {
-            return index.reset();
+            index.reset();
+            return;
         }
 
     private:
@@ -128,11 +129,11 @@ public:
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // construct/copy/destroy:
-    DLList() : first(0), last(0){};
+    DLList(){};
 
     // iterators:
     iterator begin() {
-        return ListIterator(&data[0], first);
+        return ListIterator(&data[0], data[_N].next);
     };
     iterator end() {
         return ListIterator(&data[0], _N);
@@ -177,6 +178,8 @@ public:
         --__tmp;
         return *__tmp;
     }
+
+    // Attention subscript operator does not provide have constant time acces
     reference operator[](std::size_t idx) {
         if (idx > size()) {
             throw std::out_of_range("Demanded idx is out of range.");
@@ -224,7 +227,7 @@ public:
         this->insert(end(), std::forward<_Args>(__args)...);
     }
     void pop_back() {
-        this->erase(iterator(this->_M_impl._M_node._M_prev));
+        this->erase(--end()); // end points one past the last element, so decrement it first.
     } // TODO
 
     // template <class... Args>
@@ -232,35 +235,19 @@ public:
     // iterator insert(const_iterator position, const value_type& x);
     iterator insert(const_iterator position, value_type&& x) {
         // Allocate memory
-        position_type i = allocator.allocate();
-        data[i].data = x;
+        position_type i_new = allocator.allocate();
+        data[i_new].data = x;
+    
+        // Get index of position iterator
+        size_t i_it = reinterpret_cast<position_type>(position.m_offset);
 
-        // Catch end() Iterator
-        if(position.m_offset == _N){
-            data[i].prev = last;
-            if(size()>1){
-                data[last].next = i;
-            }
-            last = i;
-            return ListIterator(&data[0],i);
-        }
+        // Insert element before current object
+        data[position.get_node()->prev].next = i_new;
+        data[i_new].prev = position.get_node()->prev;
+        data[i_new].next = i_it;
+        position.get_node()->prev = i_new;
 
-        // Adjust neighbors
-        if (is_idx_valid(position.get_node()->prev)) {
-            data[position.get_node()->prev].next = i;
-            data[i].prev = position.get_node()->prev;
-        } else {
-            first = i;
-            data[i].prev = _N;
-        }
-        if (is_idx_valid(position.get_node()->next)) {
-            data[position.get_node()->next].prev = i;
-            data[i].next = position.get_node()->next;
-        } else {
-            last = i;
-            data[i].next = _N;
-        }
-        return ListIterator(&data[0],i);
+        return ListIterator(&data[0], i_new);
     };
 
     // iterator insert(const_iterator position, size_type n, const value_type& x);
@@ -269,33 +256,27 @@ public:
     // iterator insert(const_iterator position, initializer_list<T>);
 
     iterator erase(const_iterator position) {
+        if(position == end()){
+            throw std::out_of_range("Iterator points past valid data. Can not erase.");
+        }
+        // Adjust neighbors
+        data[position.get_node()->prev].next = position.get_node()->next;
+        data[position.get_node()->next].prev = position.get_node()->prev;
+
         // Get index of element
         size_t i = reinterpret_cast<position_type>(position.m_offset);
-
-        // Adjust neighbors
-        if (is_idx_valid(position.get_node()->prev)) {
-            data[position.get_node()->prev].next = position.get_node()->next;
-        } else {
-            first = position.get_node()->next;
-        }
-        if (is_idx_valid(position.get_node()->next)) {
-            data[position.get_node()->next].prev = position.get_node()->prev;
-        } else {
-            last = position.get_node()->prev;
-        }
 
         // Free memory and reinitialize
         allocator.deallocate(i);
         data[i] = Node();
     }
+
     // iterator erase(const_iterator first, const_iterator last);
     // void swap(list<T, Allocator>&);
     void clear() {
-        for (auto& e : data) {
-            e = Node();
+        for (size_t i = 0; i < _N+1; i++) {
+            data[i] = Node();
         }
-        first = 0;
-        last = 0;
         allocator.clear();
     };
 
@@ -303,14 +284,8 @@ public:
     // template <class Predicate>
     // void remove_if(Predicate pred);
 
-    bool is_idx_valid(position_type& idx) {
-        return idx >= 0 && idx < _N;
-    }
-
 private:
-    node_type data[_N];
+    node_type data[_N + 1]; // We store one element more in order to track begin and end
     Allocator allocator;
-    position_type first;
-    position_type last;
 };
-} // Namespace Per
+} // Namespace cpb
