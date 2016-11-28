@@ -95,11 +95,17 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #############
 # Add gtest based cpp test target and link libraries
 if (CATKIN_ENABLE_TESTING)
+    include(CodeCoverage)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+	SET(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+
 	file(GLOB PROJECT_TEST_FILES_SRC RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "test/*.cpp")
 	foreach(PROJECT_TEST_FILE_SRC ${PROJECT_TEST_FILES_SRC})
 		get_filename_component(PROJECT_TEST_NAME ${PROJECT_TEST_FILE_SRC} NAME_WE)
 
 		catkin_add_gtest(${PROJECT_TEST_NAME}-test ${PROJECT_TEST_FILE_SRC})
 		target_link_libraries(${PROJECT_TEST_NAME}-test ${LIBRARY_NAME} ${catkin_LIBRARIES} ${mrt_LIBRARIES} gtest_main)
+	    setup_target_for_coverage(${PROJECT_TEST_NAME}-coverage ${PROJECT_TEST_NAME}-test coverage)
+
 	endforeach()
 endif()
