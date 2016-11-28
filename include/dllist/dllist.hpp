@@ -181,7 +181,7 @@ public:
 
     // Attention subscript operator does not provide have constant time acces
     reference operator[](std::size_t idx) {
-        if (idx > size()) {
+        if (idx >= size()) {
             throw std::out_of_range("Demanded idx is out of range.");
         }
         iterator it = begin();
@@ -228,7 +228,7 @@ public:
     }
     void pop_back() {
         this->erase(--end()); // end points one past the last element, so decrement it first.
-    } // TODO
+    }                         // TODO
 
     // template <class... Args>
     // iterator emplace(const_iterator position, Args&&... args);
@@ -237,7 +237,7 @@ public:
         // Allocate memory
         position_type i_new = allocator.allocate();
         data[i_new].data = x;
-    
+
         // Get index of position iterator
         size_t i_it = reinterpret_cast<position_type>(position.m_offset);
 
@@ -256,7 +256,7 @@ public:
     // iterator insert(const_iterator position, initializer_list<T>);
 
     iterator erase(const_iterator position) {
-        if(position == end()){
+        if (position == end()) {
             throw std::out_of_range("Iterator points past valid data. Can not erase.");
         }
         // Adjust neighbors
@@ -274,7 +274,7 @@ public:
     // iterator erase(const_iterator first, const_iterator last);
     // void swap(list<T, Allocator>&);
     void clear() {
-        for (size_t i = 0; i < _N+1; i++) {
+        for (size_t i = 0; i < _N + 1; i++) {
             data[i] = Node();
         }
         allocator.clear();
