@@ -1,14 +1,13 @@
 <package format="2">
   <name>dllist</name>
-  <version>0.0.0</version>
-  <description>ToDo: Edit package description</description>
+  <version>1.0.0</version>
+  <description>A doubly linked list implementation without pointers.</description>
 
-  <license>GPLv3</license>
+  <license>BSD</license>
   <maintainer email="cbandera@posteo.de">Claudio Bandera</maintainer>
   <author email="cbandera@posteo.de">Claudio Bandera</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>mrt_cmake_modules</build_depend>
   <test_depend>gtest</test_depend>
   <!-- 
     Documentation for dependencies:

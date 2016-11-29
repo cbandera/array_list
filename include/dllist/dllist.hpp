@@ -19,14 +19,18 @@ public:
     typedef const reference const_reference;
 
 private:
-    struct Node {
-        template <typename... _Args>
-        Node(_Args&&... __args)
-                : data(std::forward<_Args>(__args)...), next(_N), prev(_N) // Initialize idx as invalid
-                  {};
-        value_type data;
+    struct NodeBase {
         position_type next;
         position_type prev;
+        NodeBase() : next(_N), prev(_N){};
+    };
+
+    struct Node : NodeBase {
+        template <typename... _Args>
+        Node(_Args&&... __args)
+                : data(std::forward<_Args>(__args)...) // Initialize idx as invalid
+                  {};
+        value_type data;
     };
     typedef Node node_type;
 

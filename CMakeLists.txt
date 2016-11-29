@@ -5,26 +5,36 @@ project(dllist)
 ###################
 ## find packages ##
 ###################
-find_package(mrt_cmake_modules REQUIRED)
-include(UseMrtStdCompilerFlags)
-include(UseMrtAutoTarget)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
 
-include(GatherDeps)
-#remove libs, which cannot be found automatically
-#list(REMOVE_ITEM DEPENDEND_PACKAGES <package name 1> <package name 2> ...)
-find_package(AutoDeps REQUIRED COMPONENTS ${DEPENDEND_PACKAGES})
+include(CheckCXXCompilerFlag)
 
-#manually resolve removed dependend packages
-#find_package(...)
-############################
-## read source code files ##
-############################
-file(GLOB_RECURSE PROJECT_HEADER_FILES_INC RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "include/*.h" "include/*.hpp")
-file(GLOB PROJECT_SOURCE_FILES_INC RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "src/*.h" "src/*.hpp")
-file(GLOB PROJECT_SOURCE_FILES_SRC RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "src/*.cpp")
-if (PROJECT_SOURCE_FILES_SRC)
-	set(LIBRARY_NAME ${PROJECT_NAME})
+#Require C++14
+if (CMAKE_VERSION VERSION_LESS "3.1")
+  CHECK_CXX_COMPILER_FLAG("-std=c++14" Cpp14CompilerFlag)
+  if (${Cpp14CompilerFlag})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    set(CMAKE_CXX_STANDARD 14)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "17")
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    #no additional flag is required
+  else()
+    message(FATAL_ERROR "Compiler does not have c++14 support. Use at least g++4.9 or Visual Studio 2013 and newer.")
+  endif()
+else ()
+  set (CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif ()
+
+#add diagnostics color
+CHECK_CXX_COMPILER_FLAG("-fdiagnostics-color=auto" DiagColorCompilerFlag)
+if (${DiagColorCompilerFlag})
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=auto")
 endif()
+
+find_package(catkin REQUIRED COMPONENTS)
+find_package(gtest REQUIRED)
+include_directories(${gtest_INCLUDE_DIRS})
 
 ###################################
 ## catkin specific configuration ##
@@ -36,60 +46,20 @@ endif()
 # CATKIN_DEPENDS: catkin_packages dependent projects also need
 # DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include ${mrt_EXPORT_INCLUDE_DIRS}
-  LIBRARIES ${LIBRARY_NAME} ${mrt_EXPORT_LIBRARIES}
+  INCLUDE_DIRS include
   CATKIN_DEPENDS ${catkin_EXPORT_DEPENDS}
 )
 
-###########
-## Build ##
-###########
-# Add include and library directories
-include_directories(
-  include/${LIBRARY_NAME}
-  ${mrt_INCLUDE_DIRS}
-  ${catkin_INCLUDE_DIRS}
-)
-
-link_directories(
-  ${mrt_LIBRARY_DIRS}
-)
-
-if (PROJECT_SOURCE_FILES_SRC)
-	# Declare a cpp library
-	add_library(${LIBRARY_NAME}
-	  ${PROJECT_HEADER_FILES_INC}
-	  ${PROJECT_SOURCE_FILES_INC}
-	  ${PROJECT_SOURCE_FILES_SRC}
-	)
-	# Specify libraries to link a library or executable target against
-	target_link_libraries(${LIBRARY_NAME}
-	  ${catkin_LIBRARIES}
-	  ${mrt_LIBRARIES}
-	)
-endif()
+include_directories(include)
 
 #############
 ## Install ##
 #############
-if (TARGET ${PROJECT_NAME})
-	# Mark library for installation
-	install(TARGETS ${PROJECT_NAME}
-	  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-	  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-	  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-	)
-endif()
 # Mark c++ header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
 )
-#install(FILES
-#  res/test.png
-#  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
-
 #############
 ## Testing ##
 #############
@@ -104,7 +74,7 @@ if (CATKIN_ENABLE_TESTING)
 		get_filename_component(PROJECT_TEST_NAME ${PROJECT_TEST_FILE_SRC} NAME_WE)
 
 		catkin_add_gtest(${PROJECT_TEST_NAME}-test ${PROJECT_TEST_FILE_SRC})
-		target_link_libraries(${PROJECT_TEST_NAME}-test ${LIBRARY_NAME} ${catkin_LIBRARIES} ${mrt_LIBRARIES} gtest_main)
+		target_link_libraries(${PROJECT_TEST_NAME}-test ${catkin_LIBRARIES} gtest gtest_main pthread)
 	    setup_target_for_coverage(${PROJECT_TEST_NAME}-coverage ${PROJECT_TEST_NAME}-test coverage)
 
 	endforeach()
