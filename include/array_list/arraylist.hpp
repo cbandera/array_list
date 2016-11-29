@@ -3,13 +3,13 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace cpb {
+namespace cdt {
 
 template <typename _Tp, size_t _N>
-class DLList {
+class ArrayList {
 public:
     // types:
-    typedef DLList<_Tp, _N> list_type;
+    typedef ArrayList<_Tp, _N> list_type;
     typedef _Tp value_type;
     typedef size_t size_type;
     typedef size_t position_type;
@@ -35,7 +35,7 @@ private:
     typedef Node node_type;
 
     class ListIterator {
-        friend DLList;
+        friend ArrayList;
 
     public:
         ListIterator(node_type* start, position_type offset) : m_start(start), m_offset(offset) {
@@ -133,7 +133,7 @@ public:
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // construct/copy/destroy:
-    DLList(){};
+    ArrayList(){};
 
     // iterators:
     iterator begin() {

@@ -1,6 +1,6 @@
 #pkg_version=1.4
 cmake_minimum_required(VERSION 2.8.3)
-project(dllist)
+project(array_list)
 
 ###################
 ## find packages ##

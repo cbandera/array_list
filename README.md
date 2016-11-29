@@ -1,42 +1,17 @@
-# Project Name
+# Array List
 
-TODO: Write a project description
+This project aims at building custom container types with compiletime allocated memory, that gets along without pointers. That's container types based on arrays.
 
 ## Installation
-
-TODO: Describe the installation process
-
-## Usage
-
-TODO: Write usage instructions
-
-## Contributing
-
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
-
-## History
-
-TODO: Write history
-
-## Credits
-
-TODO: Write credits
-
-## License
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+This project is a header only library with only standard dependencies.
+Only if you want to run the tests, you need the following deps:
+```bash
+sudo apt-get install libgtest-dev gcov lcov
+```
+You can then run a normal cmake build. I use catkin tools for building my project, but you are free to just run
+```bash
+mkdir build
+cd build
+cmake ..
+make run_tests
+```

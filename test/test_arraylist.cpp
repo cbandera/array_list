@@ -1,7 +1,5 @@
-#include <bitset>
+#include <array_list/arraylist.hpp>
 #include <cmath>
-#include <vector>
-#include "dllist/dllist.hpp"
 #include "gtest/gtest.h"
 
 // Set up fixtures
@@ -9,7 +7,7 @@ class EmptyFixture : public ::testing::Test {
 public:
     EmptyFixture(){};
     static constexpr size_t capacity = 5;
-    cpb::DLList<int, capacity> l;
+    cdt::ArrayList<int, capacity> l;
 };
 constexpr size_t EmptyFixture::capacity;
 
@@ -21,7 +19,7 @@ public:
         }
     };
     static constexpr size_t capacity = 5;
-    cpb::DLList<int, capacity> l;
+    cdt::ArrayList<int, capacity> l;
 };
 constexpr size_t FullFixture::capacity;
 
@@ -61,7 +59,7 @@ TEST_F(EmptyFixture, MediumSize) {
 
 TEST_F(FullFixture, MaxSize) {
     ASSERT_EQ(capacity, l.max_size());
-    cpb::DLList<int, 15> l2;
+    cdt::ArrayList<int, 15> l2;
     ASSERT_EQ(15, l2.max_size());
 }
 
@@ -100,6 +98,10 @@ TEST_F(FullFixture, IteratorLoopAccess) {
         ASSERT_EQ(i, *it);
         i++;
     }
+}
+
+TEST_F(FullFixture, IteratorOutOfRangeAccess) {
+    ASSERT_THROW(*l.end(), std::out_of_range);
 }
 
 /* ------------------------------------------------------------- */
