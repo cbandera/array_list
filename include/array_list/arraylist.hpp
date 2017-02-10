@@ -42,10 +42,16 @@ private:
         }
 
         reference operator*() const {
+            if(m_offset >= _N){
+                throw std::out_of_range("Iterator is out of range.");
+            }
             return (m_start + m_offset)->data;
         }
 
         pointer operator->() const {
+            if(m_offset >= _N){
+                throw std::out_of_range("Iterator is out of range.");
+            }
             return &(m_start + m_offset)->data;
         }
 

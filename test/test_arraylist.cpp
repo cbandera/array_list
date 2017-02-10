@@ -63,14 +63,14 @@ TEST_F(FullFixture, MaxSize) {
     ASSERT_EQ(15, l2.max_size());
 }
 
-TEST_F(FullFixture, ActualSize) {
-    ASSERT_EQ((capacity + 1) * (                                          // We currently store _N + 1 objects
-                                   sizeof(decltype(l)::value_type) +      // Datatype size
-                                   2 * sizeof(decltype(l)::position_type) // index pointers left/right
-                                   ) +
-                  ceil(capacity / 8.0), // Bitset index
-              sizeof(l));               // Actual size
-}
+// TEST_F(FullArraylist, ActualSize) {
+//     ASSERT_EQ((capacity + 1) * (                                          // We currently store _N + 1 objects
+//                                    sizeof(decltype(l)::value_type) +      // Datatype size
+//                                    2 * sizeof(decltype(l)::position_type) // index pointers left/right
+//                                    ) +
+//                   ceil(capacity / 8.0), // Bitset index
+//               sizeof(l));               // Actual size
+// }
 
 /* ------------------------------------------------------------- */
 TEST_F(FullFixture, SubscriptAccess) {
